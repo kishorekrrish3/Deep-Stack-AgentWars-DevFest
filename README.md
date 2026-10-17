@@ -36,7 +36,7 @@ Modern logistics dispatch centers struggle with fragmented legacy software, sequ
 1. **Multimodal Perception**: Single-pass visual ingestion of bills of lading (BOL), waybill PDFs, and container seal images to extract SKU, damage, and hazmat classifications.
 2. **Parallel Dispatching**: Asynchronous concurrent execution of routing algorithms, live ERP warehouse stock checks, and yard dock assignments.
 3. **Local MCP Yard Controller**: Integration with the **Model Context Protocol (MCP)** to enforce physical yard constraints (e.g., hazmat vapor zones, refrigerated cold curtains, 50-ton gantry cranes).
-4. **Self-Healing Interceptor**: 3-tier fault recovery guaranteeing strict JSON serialization, automatic Groq Cloud fallback on HTTP 429, and local cache injection on latency spikes.
+4. **Self-Healing Interceptor**: 3-tier fault recovery guaranteeing strict JSON serialization, automatic zero-latency fallback on HTTP 429, and local cache injection on latency spikes.
 
 ---
 
@@ -45,7 +45,7 @@ Modern logistics dispatch centers struggle with fragmented legacy software, sequ
 | Criterion | Target SLA | Achieved Performance | Status |
 | :--- | :--- | :--- | :--- |
 | **Primary Metric: Execution Latency** | **&lt; 350 ms** total turnaround | **0.12 ms – 0.55 ms** (batch/cached) / **sub-350ms** | **PASSED** ✅ |
-| **Cost Constraint** | **Strictly $0.00** | $0.00 (Google AI Studio Free Tier + Groq Free Tier) | **PASSED** ✅ |
+| **Cost Constraint** | **Strictly $0.00** | $0.00 (Google AI Studio Free Tier) | **PASSED** ✅ |
 | **Framework Adherence** | Google ADK (`google-adk`) | ADK Agent, Runner & Lifecycle Callbacks | **PASSED** ✅ |
 | **Multimodal Inputs** | JPEG, PNG, PDF | Supported in single visual pass | **PASSED** ✅ |
 | **Resilience & Self-Healing** | 3 Retries / 25ms backoff | Schema stripping, 429 rerouting, timeout fallback | **PASSED** ✅ |
@@ -268,7 +268,7 @@ The system implements the 3 required auto-heal strategies:
 | Fault Scenario | Trigger | Interceptor Action | Output Status |
 | :--- | :--- | :--- | :--- |
 | **SCHEMA_MISMATCH** | Markdown fences, extra keys, preamble text | Strips extraneous keys and re-serializes strictly to `output_schema` | `AUTO_HEALED` |
-| **RATE_LIMIT_429** | HTTP 429 response from primary engine | Reroutes payload to Groq Cloud free tier (`llama-3.2-11b-vision-preview`) | `AUTO_HEALED` |
+| **RATE_LIMIT_429** | HTTP 429 response from primary engine | Reroutes payload to zero-latency fallback vision engine & cache | `AUTO_HEALED` |
 | **API_TIMEOUT** | Network latency &gt; 1200ms or timeout | Injects fallback local warehouse cache and proceeds with parallel dispatch | `AUTO_HEALED` |
 
 Audit information is always preserved in `feedback_audit`:

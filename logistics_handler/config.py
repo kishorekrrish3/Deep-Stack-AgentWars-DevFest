@@ -1,6 +1,7 @@
 """
 Configuration parameters for LogisticsHandler-ADK-UltraFast
 Strict adherence to Zero-Cost ($0.00) and Sub-350ms Latency Target
+Pure Google AI Studio Native Integration (No Groq dependency)
 """
 
 import os
@@ -27,11 +28,7 @@ GENERATION_TEMPERATURE = 0.0
 MAX_OUTPUT_TOKENS = 512
 RESPONSE_MIME_TYPE = "application/json"
 
-# Groq Cloud Free Tier Fallback Engine
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.2-11b-vision-preview")
-
-# Latency & SLA Parameters
+# Performance SLA & Latency Parameters
 TARGET_LATENCY_MS = float(os.getenv("TARGET_LATENCY_MS", 350.0))
 MAX_LATENCY_THRESHOLD_MS = float(os.getenv("MAX_LATENCY_THRESHOLD_MS", 1200.0))
 FAST_CACHE_ENABLED = os.getenv("FAST_CACHE_ENABLED", "true").lower() in ("true", "1", "yes")

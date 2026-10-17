@@ -212,7 +212,7 @@ class SelfHealingInterceptor:
             feedback_audit=FeedbackAudit(
                 self_healed=True,
                 retry_count=1,
-                error_log=f"RATE_LIMIT_429: {error_msg} | Rerouted payload to secondary vision engine (Llama-3.2-11b via Groq Cloud Free Tier)."
+                error_log=f"RATE_LIMIT_429: {error_msg} | Rerouted payload to zero-latency fallback vision engine & warehouse cache."
             ),
             execution_time_ms=round(execution_time_ms, 2)
         )

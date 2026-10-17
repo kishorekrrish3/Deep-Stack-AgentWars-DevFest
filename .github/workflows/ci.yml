@@ -1,0 +1,43 @@
+name: CI - UltraFast Logistics Dispatcher
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Run Pytest Suite (11 Tests)
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        PRIMARY_MODEL: gemini-2.0-flash
+        FALLBACK_PRIMARY_MODEL: gemini-3.8-flash
+      run: |
+        pytest tests/ -v
+
+    - name: Run Sub-350ms Latency SLA Benchmark
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        PRIMARY_MODEL: gemini-2.0-flash
+        FALLBACK_PRIMARY_MODEL: gemini-3.8-flash
+      run: |
+        python benchmark.py

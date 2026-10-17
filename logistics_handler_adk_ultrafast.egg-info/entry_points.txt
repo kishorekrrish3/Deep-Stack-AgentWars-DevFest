@@ -1,0 +1,2 @@
+[console_scripts]
+logistics-dispatcher = logistics_handler.cli:main
