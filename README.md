@@ -67,8 +67,63 @@ Modern logistics dispatch centers struggle with fragmented legacy software, sequ
   <img src="diagram.png" alt="LogisticsHandler-ADK-UltraFast Architecture & Operational Flow" width="100%">
 </p>
 
+### End-to-End API to MCP Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph Clients["Clients & Interfaces"]
+        UI["Live Web Dashboard\n(Dispatcher + AI Copilot)"]
+        CLI["Interactive CLI\n(dispatch / chat / benchmark)"]
+        REST["External REST API\n(/dispatch, /copilot/chat)"]
+        MCPClient["External MCP Client\n(/mcp/tools, /mcp/call)"]
+    end
+
+    subgraph ADK["Google ADK Dual-Agent Core"]
+        FastAgent["LogisticsHandlerAgent (ADK)\n• Strict JSON Output\n• Sub-350ms SLA Target\n• Single-Pass Execution"]
+        CopilotAgent["LogisticsCopilotAgent (ADK)\n• Multi-Turn Memory\n• Conversational Dialogue\n• Tool Calling & Routing\n• Multimodal Q&A"]
+    end
+
+    subgraph Perception["Multimodal Perception Layer"]
+        Vision["Single-Pass Visual Engine\n• Scanned Bills of Lading (PDF)\n• Container Images (JPEG/PNG)\n• Damage & Hazmat Detection"]
+    end
+
+    subgraph Tools["Concurrent Tool Execution (asyncio.gather)"]
+        T1["calculate_low_latency_route\n(Corridor, ETAs, Tolls)"]
+        T2["check_erp_stock_live\n(Staging, Inventory, Hazmat)"]
+        T3["mcp_yard_controller\n(MCP Yard Bus)"]
+        T4["trigger_autonomous_dispatch\n(Pipeline Trigger)"]
+    end
+
+    subgraph MCP["Local Model Context Protocol (MCP) Server"]
+        D1["BAY-HZ07: Hazmat Bay 7 (150m perimeter, spark-proof)"]
+        D2["BAY-CS02: Cold Storage Dock 2 (-20C air curtain)"]
+        D3["BAY-HL19: Heavy Lift Bay 19 (50-ton gantry crane)"]
+        D4["BAY-N04: General Cargo Dock 4 (Hydraulic levelers)"]
+    end
+
+    subgraph Feedback["Self-Healing Interceptor Feedback Loop"]
+        H1{"Error / 429 / Spike?"}
+        H2["Strategy 0: Direct Success (200 OK)"]
+        H3["Strategy 1: 25ms Retry Loop (3 Retries)"]
+        H4["Strategy 2: Local Cache Fallback"]
+    end
+
+    Clients --> FastAgent
+    Clients --> CopilotAgent
+    FastAgent --> Vision
+    CopilotAgent --> Vision
+    FastAgent --> Tools
+    CopilotAgent --> Tools
+    Tools --> MCP
+    Tools --> Feedback
+```
+
+### The Dual Google ADK Agents
+1. **`LogisticsHandlerAgent` (Autonomous Dispatcher)**: Built for high-speed automated pipelines. Follows **Rule 1 (Speed First)** to emit typed JSON in `< 350ms` with zero conversational filler.
+2. **`LogisticsCopilotAgent` (Conversational Copilot)**: Built for interactive human-in-the-loop operations. Provides multi-turn memory, natural dialogue, live MCP yard inquiries, real-time inventory checks, multimodal waybill inspection, and command execution.
+
 ### The 5 Operational Rules
-- **RULE 1 (SPEED FIRST)**: Zero conversational padding, markdown preambles, or apologies. Emits pure JSON actions directly.
+- **RULE 1 (SPEED FIRST)**: Zero conversational padding, markdown preambles, or apologies for the autonomous dispatcher. Emits pure JSON actions directly.
 - **RULE 2 (MULTIMODAL PARSING)**: Single visual pass extracts SKU, Destination, Consignee, Hazmat status, and Package Damage.
 - **RULE 3 (PARALLEL DISPATCH)**: All tool calls (`calculate_low_latency_route`, `check_erp_stock_live`, `mcp_yard_controller`) fire concurrently via `asyncio.gather()`.
 - **RULE 4 (MANDATORY FEEDBACK LOOP)**: Interceptor catches errors and applies 25ms backoff retries with safe fallbacks.

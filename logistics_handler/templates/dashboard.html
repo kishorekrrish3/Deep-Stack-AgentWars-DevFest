@@ -83,6 +83,22 @@
   <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
+    <!-- View Switcher Tabs -->
+    <div class="flex items-center space-x-3 border-b border-dark-border pb-3">
+      <button id="tab-dispatcher-btn" onclick="switchTab('dispatcher')" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/30 transition shadow-sm">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>Autonomous Dispatcher (Sub-350ms)</span>
+      </button>
+      <button id="tab-copilot-btn" onclick="switchTab('copilot')" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold bg-dark-card hover:bg-slate-800 text-slate-400 hover:text-white border border-dark-border transition">
+        <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i>
+        <span>AI Conversational Copilot (Google ADK)</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono font-medium">LIVE</span>
+      </button>
+    </div>
+
+    <!-- Dispatcher View Container -->
+    <div id="dispatcher-view" class="space-y-8">
+
     <!-- KPI Summary Grid -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="bg-dark-card border border-dark-border p-5 rounded-2xl relative overflow-hidden">
@@ -320,6 +336,85 @@
   "message": "Click 'Dispatch Now' to execute ultra-fast multimodal pipeline."
 }</pre>
     </div>
+    <!-- End Dispatcher View Container -->
+
+    <!-- AI Conversational Copilot View -->
+    <div id="copilot-view" class="hidden space-y-6">
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-xl space-y-5">
+        <!-- Copilot Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-dark-border gap-3">
+          <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 to-brand-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <i data-lucide="bot" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-lg text-white">LogisticsCopilotAgent</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 font-mono">Google ADK Agent</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">Multimodal Ready</span>
+              </div>
+              <p class="text-xs text-slate-400">Natural-language dialogue, multi-turn memory, MCP yard constraints & multimodal inspection</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="clearChatHistory()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition flex items-center space-x-1">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Clear Session</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="flex flex-wrap gap-2 pt-1">
+          <span class="text-xs text-slate-400 self-center">Try asking:</span>
+          <button onclick="fillAndSend('What dock is assigned for HAZMAT cargo and what are the safety rules?')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-dark-border transition">
+            🏢 "Dock for HAZMAT?"
+          </button>
+          <button onclick="fillAndSend('Can you check real-time warehouse stock for SKU-AUTO-1001?')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-dark-border transition">
+            📦 "Check stock for SKU-AUTO-1001"
+          </button>
+          <button onclick="fillAndSend('What is the lowest latency freight corridor from Chicago to Dallas for 14 tons?')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-dark-border transition">
+            🛣️ "Route Chicago to Dallas"
+          </button>
+          <button onclick="fillAndSend('Please dispatch SKU-CHEM-9012 to Dallas immediately.')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-brand-300 border border-brand-500/30 transition">
+            ⚡ "Dispatch SKU-CHEM-9012"
+          </button>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div id="chat-messages" class="h-[420px] overflow-y-auto space-y-4 pr-2 border border-slate-800/80 rounded-xl p-4 bg-slate-950/40">
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-2xl text-sm text-slate-200 space-y-2">
+              <p>Hello! I am <strong>LogisticsCopilot</strong>, your Autonomous Conversational Logistics Agent powered by <strong>Google ADK</strong>.</p>
+              <p class="text-xs text-slate-400">You can query live MCP yard dock constraints, check warehouse inventory, calculate low-latency routes, or trigger autonomous dispatches. You can also upload waybills or cargo photos using the paperclip button!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chat-form" onsubmit="handleChatSubmit(event)" class="space-y-2 pt-2">
+          <div id="chat-attachment-preview" class="hidden flex items-center space-x-2 text-xs bg-slate-800 px-3 py-1.5 rounded-lg text-cyan-300 w-fit">
+            <i data-lucide="file" class="w-3.5 h-3.5"></i>
+            <span id="chat-filename">attached_file.png</span>
+            <button type="button" onclick="clearAttachment()" class="text-slate-400 hover:text-white ml-2">&times;</button>
+          </div>
+          <div class="flex items-center space-x-2">
+            <label class="cursor-pointer p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Attach waybill image or PDF">
+              <i data-lucide="paperclip" class="w-5 h-5"></i>
+              <input type="file" id="chat-file-input" class="hidden" accept="image/*,application/pdf" onchange="handleChatFileSelect(this)">
+            </label>
+            <input type="text" id="chat-input" placeholder="Ask LogisticsCopilot anything (e.g. 'Can Dock 14 handle flammable liquids?')..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
+            <button type="submit" id="chat-send-btn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-cyan-600 hover:from-brand-500 hover:to-cyan-500 text-white font-medium text-sm transition shadow-lg flex items-center space-x-1.5">
+              <span>Send</span>
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
   </main>
 
@@ -496,6 +591,178 @@
       }
       const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
       alert(`Benchmark Completed: ${iterations} Iterations\nAverage Latency: ${avg.toFixed(2)} ms (SLA Target: < 350ms)`);
+    }
+
+    // -------------------------------------------------------------------------
+    // AI Conversational Copilot Logic (Google ADK)
+    // -------------------------------------------------------------------------
+    let currentSessionId = "session-" + Math.random().toString(36).substring(2, 8);
+    let chatAttachmentBase64 = null;
+    let chatAttachmentMime = "image/jpeg";
+
+    function switchTab(tab) {
+      const dispView = document.getElementById('dispatcher-view');
+      const copilotView = document.getElementById('copilot-view');
+      const dispBtn = document.getElementById('tab-dispatcher-btn');
+      const copilotBtn = document.getElementById('tab-copilot-btn');
+
+      if (tab === 'copilot') {
+        dispView.classList.add('hidden');
+        copilotView.classList.remove('hidden');
+        copilotBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition shadow-sm";
+        dispBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold bg-dark-card hover:bg-slate-800 text-slate-400 hover:text-white border border-dark-border transition";
+      } else {
+        copilotView.classList.add('hidden');
+        dispView.classList.remove('hidden');
+        dispBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/30 transition shadow-sm";
+        copilotBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold bg-dark-card hover:bg-slate-800 text-slate-400 hover:text-white border border-dark-border transition";
+      }
+      lucide.createIcons();
+    }
+
+    function handleChatFileSelect(input) {
+      const file = input.files[0];
+      if (!file) return;
+      document.getElementById('chat-filename').innerText = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      document.getElementById('chat-attachment-preview').classList.remove('hidden');
+      chatAttachmentMime = file.type || "image/jpeg";
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const full = e.target.result;
+        chatAttachmentBase64 = full.includes(',') ? full.split(',')[1] : full;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearAttachment() {
+      chatAttachmentBase64 = null;
+      document.getElementById('chat-file-input').value = "";
+      document.getElementById('chat-attachment-preview').classList.add('hidden');
+    }
+
+    function fillAndSend(msg) {
+      document.getElementById('chat-input').value = msg;
+      handleChatSubmit(new Event('submit'));
+    }
+
+    function clearChatHistory() {
+      currentSessionId = "session-" + Math.random().toString(36).substring(2, 8);
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-2xl text-sm text-slate-200 space-y-2">
+            <p>Session reset! I am ready for new queries on dock allocations, live stock, freight corridors, or cargo inspections.</p>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    async function handleChatSubmit(event) {
+      if (event && event.preventDefault) event.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text && !chatAttachmentBase64) return;
+
+      const container = document.getElementById('chat-messages');
+      const userMsgHtml = `
+        <div class="flex items-start justify-end space-x-3">
+          <div class="bg-gradient-to-r from-brand-600/40 to-cyan-600/40 border border-brand-500/30 rounded-2xl p-4 max-w-2xl text-sm text-white">
+            <p>${escapeHtml(text)}</p>
+            ${chatAttachmentBase64 ? '<span class="inline-block mt-2 text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">📎 Document Attached</span>' : ''}
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', userMsgHtml);
+      input.value = "";
+
+      const typingId = 'typing-' + Date.now();
+      container.insertAdjacentHTML('beforeend', `
+        <div id="${typingId}" class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 text-xs text-slate-400 animate-pulse">
+            Thinking & orchestrating ADK tools...
+          </div>
+        </div>
+      `);
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+
+      try {
+        const payload = {
+          message: text || "Please inspect this document and provide logistics recommendations.",
+          session_id: currentSessionId,
+          image_base64: chatAttachmentBase64,
+          image_mime_type: chatAttachmentMime
+        };
+        clearAttachment();
+
+        const res = await fetch('/copilot/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        document.getElementById(typingId)?.remove();
+
+        const toolsBadge = (data.tools_used && data.tools_used.length > 0)
+          ? `<div class="flex flex-wrap gap-1 mt-2">${data.tools_used.map(t => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">🔧 ${t}</span>`).join('')}</div>`
+          : '';
+
+        const replyFormatted = formatMarkdownSimple(data.reply);
+        const botMsgHtml = `
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 max-w-2xl text-sm text-slate-200 space-y-2">
+              <div class="prose prose-invert max-w-none text-sm leading-relaxed">${replyFormatted}</div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] text-slate-500">
+                <span class="font-mono text-emerald-400">⚡ ${data.execution_time_ms.toFixed(1)} ms</span>
+                <span class="text-slate-400">Google ADK • Gemini</span>
+              </div>
+              ${toolsBadge}
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', botMsgHtml);
+      } catch (err) {
+        document.getElementById(typingId)?.remove();
+        container.insertAdjacentHTML('beforeend', `
+          <div class="text-xs text-rose-400 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+            Error calling Copilot: ${err.message}
+          </div>
+        `);
+      }
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
+    }
+
+    function formatMarkdownSimple(text) {
+      if (!text) return "";
+      let html = escapeHtml(text)
+        .replace(/### (.*?)\n/g, '<h4 class="font-bold text-white text-base mt-2 mb-1">$1</h4>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-slate-800 text-emerald-300 font-mono text-xs">$1</code>')
+        .replace(/\n- (.*?)/g, '<li class="ml-4 list-disc text-slate-300">$1</li>')
+        .replace(/\n\n/g, '<br><br>');
+      return html;
     }
   </script>
 </body>
