@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogisticsHandler-ADK-UltraFast | Multimodal Yard Dispatcher</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              900: '#064e3b'
+            },
+            dark: {
+              bg: '#090d16',
+              card: '#111827',
+              border: '#1f293d',
+              accent: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulse-fast {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(0.98); }
+    }
+    .sla-active {
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-dark-bg text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-dark-border bg-dark-card/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <i data-lucide="truck" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">LogisticsHandler</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 font-mono font-medium">ADK-v2.0</span>
+          </div>
+          <p class="text-xs text-slate-400">Autonomous Logistics & Multimodal Yard Dispatcher</p>
+        </div>
+      </div>
+
+      <!-- Header Badges -->
+      <div class="flex items-center space-x-3">
+        <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-dark-border text-xs">
+          <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-slate-400">Target SLA:</span>
+          <span class="font-mono font-semibold text-emerald-400">&lt; 350ms</span>
+        </div>
+        <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-dark-border text-xs">
+          <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-400"></i>
+          <span class="text-slate-400">Cost:</span>
+          <span class="font-mono font-semibold text-white">$0.00 (Free Tier)</span>
+        </div>
+        <div class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="font-medium">Online</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- KPI Summary Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-dark-card border border-dark-border p-5 rounded-2xl relative overflow-hidden">
+        <div class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Turnaround Latency</div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="metric-latency" class="text-3xl font-extrabold font-mono text-emerald-400">--</span>
+          <span class="text-xs text-slate-500">ms</span>
+        </div>
+        <div id="sla-badge" class="mt-2 inline-flex items-center text-xs font-medium text-emerald-400">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Target &lt; 350ms
+        </div>
+      </div>
+
+      <div class="bg-dark-card border border-dark-border p-5 rounded-2xl">
+        <div class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Dispatch Status</div>
+        <div class="mt-2">
+          <span id="metric-status" class="text-2xl font-bold font-mono text-slate-300">IDLE</span>
+        </div>
+        <div id="metric-substatus" class="mt-2 text-xs text-slate-500">Ready for incoming waybill</div>
+      </div>
+
+      <div class="bg-dark-card border border-dark-border p-5 rounded-2xl">
+        <div class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Self-Healing Interceptor</div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="metric-healing" class="text-2xl font-bold font-mono text-cyan-400">ACTIVE</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500">Retries: 3 | 25ms Backoff</div>
+      </div>
+
+      <div class="bg-dark-card border border-dark-border p-5 rounded-2xl">
+        <div class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Model Context Protocol</div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span class="text-2xl font-bold font-mono text-purple-400">MCP-YARD</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500">Local Zero-Latency Bus</div>
+      </div>
+    </div>
+
+    <!-- Main Dispatch Controls & Yard Map -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Left Column: Dispatch Controls & Ingestion -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-6">
+          <div class="flex items-center justify-between border-b border-dark-border pb-4">
+            <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+              <i data-lucide="package" class="w-5 h-5 text-brand-400"></i>
+              <span>Multimodal Ingestion Console</span>
+            </h2>
+            <div class="flex space-x-2">
+              <button onclick="loadScenario('clean')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                Clean Freight
+              </button>
+              <button onclick="loadScenario('hazmat')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">
+                Hazmat Alert
+              </button>
+              <button onclick="loadScenario('damaged')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/30 transition">
+                Damaged Seal
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Waybill / BOL Tracking ID</label>
+              <input id="input-bill-id" type="text" value="WB-99482-TX" class="w-full bg-slate-900 border border-dark-border rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">SKU Identification</label>
+              <input id="input-sku" type="text" value="SKU-AUTO-1001" class="w-full bg-slate-900 border border-dark-border rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Origin Facility</label>
+              <input id="input-origin" type="text" value="Chicago, IL" class="w-full bg-slate-900 border border-dark-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Destination Facility</label>
+              <input id="input-dest" type="text" value="Dallas, TX" class="w-full bg-slate-900 border border-dark-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Cargo Weight (Tons)</label>
+              <input id="input-weight" type="number" step="0.5" value="12.5" class="w-full bg-slate-900 border border-dark-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Dock Type Requirement</label>
+              <select id="input-dock-type" class="w-full bg-slate-900 border border-dark-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                <option value="STANDARD">Standard Dry Dock</option>
+                <option value="HAZMAT">Hazmat Isolation Bay</option>
+                <option value="COLD_CHAIN">Cold Chain Sub-Zero</option>
+                <option value="HEAVY_LIFT">Heavy Lift Gantry</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- File Upload Zone -->
+          <div class="border-2 border-dashed border-dark-border rounded-2xl p-6 text-center hover:border-brand-500/50 transition cursor-pointer relative bg-slate-900/50">
+            <input type="file" id="file-upload" accept="image/jpeg,image/png,application/pdf" onchange="handleFileSelected(event)" class="absolute inset-0 opacity-0 cursor-pointer">
+            <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-slate-400 mb-2"></i>
+            <div id="upload-label" class="text-sm text-slate-300 font-medium">Drop waybill image (JPEG/PNG) or PDF here, or click to browse</div>
+            <div class="text-xs text-slate-500 mt-1">Single-pass multimodal parsing: SKU, Damage, Hazmat extraction</div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap gap-3">
+            <button onclick="triggerDispatch(false)" id="btn-dispatch" class="flex-1 bg-gradient-to-r from-brand-600 to-emerald-500 hover:from-brand-500 hover:to-emerald-400 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center justify-center space-x-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>Dispatch Now (&lt; 350ms SLA)</span>
+            </button>
+            <button onclick="runBenchmark(10)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 px-5 rounded-xl border border-slate-700 transition flex items-center space-x-2">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-cyan-400"></i>
+              <span>10x Batch Test</span>
+            </button>
+          </div>
+
+          <!-- Self-Healing Chaos Simulator -->
+          <div class="pt-4 border-t border-dark-border">
+            <div class="text-xs uppercase font-semibold text-slate-400 mb-2">Chaos Engineering & Interceptor Verification</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button onclick="triggerDispatchWithChaos('rate_limit')" class="px-3 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-medium text-left transition">
+                <i data-lucide="flame" class="w-3.5 h-3.5 inline mr-1"></i> Sim 429 Rate Limit
+              </button>
+              <button onclick="triggerDispatchWithChaos('latency_spike')" class="px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-medium text-left transition">
+                <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1"></i> Sim Latency Spike
+              </button>
+              <button onclick="triggerDispatchWithChaos('schema_corruption')" class="px-3 py-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-medium text-left transition">
+                <i data-lucide="shield-alert" class="w-3.5 h-3.5 inline mr-1"></i> Sim Schema Corruption
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Visual Yard Matrix & Telemetry -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Live Yard Map -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-cyan-400"></i>
+              <span>Live MCP Yard Matrix</span>
+            </h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Protocol active</span>
+          </div>
+
+          <!-- Yard Dock Grid -->
+          <div class="grid grid-cols-2 gap-3">
+            <div id="dock-STANDARD" class="p-4 rounded-xl border border-dark-border bg-slate-900/50 space-y-2 transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold text-white">Dock-04</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">Dry Freight</span>
+              </div>
+              <div class="text-[11px] text-slate-400">North Terminal standard bay</div>
+              <div class="text-[10px] text-slate-500 font-mono">Max: 35t | Clear: 14.5ft</div>
+            </div>
+
+            <div id="dock-HAZMAT" class="p-4 rounded-xl border border-dark-border bg-slate-900/50 space-y-2 transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold text-white">Dock-14</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">HAZMAT</span>
+              </div>
+              <div class="text-[11px] text-slate-400">Isolation Zone Bay 7</div>
+              <div class="text-[10px] text-slate-500 font-mono">Grounding & Vapor Seal</div>
+            </div>
+
+            <div id="dock-COLD_CHAIN" class="p-4 rounded-xl border border-dark-border bg-slate-900/50 space-y-2 transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold text-white">Dock-02</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">Refrigerated</span>
+              </div>
+              <div class="text-[11px] text-slate-400">Cold Chain Sub-Zero</div>
+              <div class="text-[10px] text-slate-500 font-mono">Temp: -20C Air Curtain</div>
+            </div>
+
+            <div id="dock-HEAVY_LIFT" class="p-4 rounded-xl border border-dark-border bg-slate-900/50 space-y-2 transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono font-bold text-white">Dock-19</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">Heavy Lift</span>
+              </div>
+              <div class="text-[11px] text-slate-400">South Machinery Gantry</div>
+              <div class="text-[10px] text-slate-500 font-mono">50t Crane Active</div>
+            </div>
+          </div>
+
+          <div id="yard-restriction-box" class="p-3 rounded-xl bg-slate-900 border border-dark-border text-xs text-slate-300 font-mono">
+            Dock assignment pending dispatch execution...
+          </div>
+        </div>
+
+        <!-- Latency Breakdown -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-4">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-2">
+            <i data-lucide="gauge" class="w-4 h-4 text-emerald-400"></i>
+            <span>Latency SLA Breakdown</span>
+          </h3>
+
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-400">Total Turnaround</span>
+                <span id="prog-total-val" class="font-mono text-emerald-400">0.0 ms</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div id="prog-total-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 5%"></div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-dark-border grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span class="text-slate-500">Route Corridor:</span>
+                <span id="summary-corridor" class="block font-mono text-slate-200 mt-0.5">--</span>
+              </div>
+              <div>
+                <span class="text-slate-500">ETA / Toll:</span>
+                <span id="summary-eta" class="block font-mono text-slate-200 mt-0.5">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Structured JSON Audit Section -->
+    <div class="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-dark-border pb-3">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-2">
+          <i data-lucide="code" class="w-4 h-4 text-cyan-400"></i>
+          <span>Strict JSON Output & Self-Healing Audit Trail</span>
+        </h3>
+        <span class="text-xs text-slate-400 font-mono">RULE 1 (Pure JSON Actions)</span>
+      </div>
+      <pre id="json-viewer" class="bg-slate-950 p-4 rounded-xl text-xs font-mono text-emerald-300 overflow-x-auto border border-dark-border max-h-96">{
+  "status": "READY",
+  "message": "Click 'Dispatch Now' to execute ultra-fast multimodal pipeline."
+}</pre>
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    let uploadedBase64 = null;
+    let uploadedMime = null;
+
+    function handleFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      document.getElementById('upload-label').innerText = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      uploadedMime = file.type || 'image/jpeg';
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedBase64 = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function loadScenario(type) {
+      if (type === 'clean') {
+        document.getElementById('input-bill-id').value = 'WB-99482-TX';
+        document.getElementById('input-sku').value = 'SKU-AUTO-1001';
+        document.getElementById('input-dock-type').value = 'STANDARD';
+        document.getElementById('input-weight').value = '12.5';
+      } else if (type === 'hazmat') {
+        document.getElementById('input-bill-id').value = 'WB-HAZ-5501-IL';
+        document.getElementById('input-sku').value = 'SKU-CHEM-9012';
+        document.getElementById('input-dock-type').value = 'HAZMAT';
+        document.getElementById('input-weight').value = '8.0';
+      } else if (type === 'damaged') {
+        document.getElementById('input-bill-id').value = 'WB-DAMAGED-1004';
+        document.getElementById('input-sku').value = 'SKU-ELEC-4401';
+        document.getElementById('input-dock-type').value = 'STANDARD';
+        document.getElementById('input-weight').value = '15.0';
+      }
+    }
+
+    function highlightDock(dockType) {
+      ['STANDARD', 'HAZMAT', 'COLD_CHAIN', 'HEAVY_LIFT'].forEach(d => {
+        const el = document.getElementById(`dock-${d}`);
+        if (el) {
+          el.classList.remove('border-brand-500', 'bg-brand-500/10', 'sla-active');
+        }
+      });
+      const activeEl = document.getElementById(`dock-${dockType}`);
+      if (activeEl) {
+        activeEl.classList.add('border-brand-500', 'bg-brand-500/10', 'sla-active');
+      }
+    }
+
+    async function triggerDispatch(chaosOptions = {}) {
+      const btn = document.getElementById('btn-dispatch');
+      btn.disabled = true;
+      btn.classList.add('opacity-75');
+
+      const payload = {
+        bill_id: document.getElementById('input-bill-id').value,
+        sku: document.getElementById('input-sku').value,
+        origin: document.getElementById('input-origin').value,
+        destination: document.getElementById('input-dest').value,
+        cargo_tons: parseFloat(document.getElementById('input-weight').value) || 10.0,
+        dock_type: document.getElementById('input-dock-type').value,
+        image_base64: uploadedBase64,
+        image_mime_type: uploadedMime,
+        simulate_429: !!chaosOptions.simulate_429,
+        simulate_latency_spike: !!chaosOptions.simulate_latency_spike,
+        simulate_schema_corruption: !!chaosOptions.simulate_schema_corruption
+      };
+
+      try {
+        const res = await fetch('/dispatch', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-75');
+      }
+    }
+
+    function triggerDispatchWithChaos(type) {
+      if (type === 'rate_limit') {
+        triggerDispatch({ simulate_429: true });
+      } else if (type === 'latency_spike') {
+        triggerDispatch({ simulate_latency_spike: true });
+      } else if (type === 'schema_corruption') {
+        triggerDispatch({ simulate_schema_corruption: true });
+      }
+    }
+
+    function renderResult(data) {
+      document.getElementById('metric-latency').innerText = data.execution_time_ms.toFixed(1);
+      const isSlaPassed = data.execution_time_ms < 350.0;
+      const slaBadge = document.getElementById('sla-badge');
+      if (isSlaPassed) {
+        slaBadge.className = "mt-2 inline-flex items-center text-xs font-medium text-emerald-400";
+        slaBadge.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> SLA Passed (&lt; 350ms)`;
+      } else {
+        slaBadge.className = "mt-2 inline-flex items-center text-xs font-medium text-amber-400";
+        slaBadge.innerHTML = `<i data-lucide="alert-triangle" class="w-3.5 h-3.5 mr-1"></i> Auto-Healed within Fallback`;
+      }
+
+      document.getElementById('metric-status').innerText = data.status;
+      if (data.status === 'SUCCESS') {
+        document.getElementById('metric-status').className = "text-2xl font-bold font-mono text-emerald-400";
+      } else if (data.status === 'AUTO_HEALED') {
+        document.getElementById('metric-status').className = "text-2xl font-bold font-mono text-cyan-400";
+      } else {
+        document.getElementById('metric-status').className = "text-2xl font-bold font-mono text-rose-400";
+      }
+
+      document.getElementById('metric-substatus').innerText = data.feedback_audit.self_healed ? 'Self-Healed Interceptor Engaged' : 'Direct Dispatch Complete';
+
+      // Update Yard Restriction box
+      document.getElementById('yard-restriction-box').innerHTML = `
+        <span class="text-emerald-400 font-bold">${data.mcp_yard_context.assigned_dock}</span>: ${data.mcp_yard_context.dock_restrictions}
+      `;
+
+      // Highlight active dock
+      let detectedDock = 'STANDARD';
+      if (data.mcp_yard_context.assigned_dock.includes('14') || data.multimodal_summary.hazmat_classification !== 'NONE') {
+        detectedDock = 'HAZMAT';
+      } else if (data.mcp_yard_context.assigned_dock.includes('02')) {
+        detectedDock = 'COLD_CHAIN';
+      } else if (data.mcp_yard_context.assigned_dock.includes('19')) {
+        detectedDock = 'HEAVY_LIFT';
+      }
+      highlightDock(detectedDock);
+
+      // Routing
+      document.getElementById('summary-corridor').innerText = data.routing_decision.corridor;
+      document.getElementById('summary-eta').innerText = `${data.routing_decision.eta_hours} hrs | $${data.routing_decision.toll_cost}`;
+
+      // Progress bar (scaled against 350ms)
+      const pct = Math.min(100, Math.max(5, (data.execution_time_ms / 350.0) * 100));
+      document.getElementById('prog-total-val').innerText = `${data.execution_time_ms.toFixed(1)} ms`;
+      document.getElementById('prog-total-bar').style.width = `${pct}%`;
+      document.getElementById('prog-total-bar').className = isSlaPassed ? "bg-emerald-500 h-2 rounded-full" : "bg-amber-500 h-2 rounded-full";
+
+      // JSON viewer
+      document.getElementById('json-viewer').innerText = JSON.stringify(data, null, 2);
+      lucide.createIcons();
+    }
+
+    async function runBenchmark(iterations = 10) {
+      const latencies = [];
+      for (let i = 0; i < iterations; i++) {
+        const payload = {
+          bill_id: `WB-BENCH-${i+1}`,
+          sku: 'SKU-AUTO-1001',
+          origin: 'Chicago, IL',
+          destination: 'Dallas, TX',
+          cargo_tons: 10.0 + i,
+          dock_type: 'STANDARD'
+        };
+        const res = await fetch('/dispatch', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        latencies.push(d.execution_time_ms);
+        renderResult(d);
+        await new Promise(r => setTimeout(r, 10));
+      }
+      const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+      alert(`Benchmark Completed: ${iterations} Iterations\nAverage Latency: ${avg.toFixed(2)} ms (SLA Target: < 350ms)`);
+    }
+  </script>
+</body>
+</html>

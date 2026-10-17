@@ -1,0 +1,19 @@
+# Core Agent Development Kit & GenAI
+google-adk>=2.12.0
+google-genai>=2.31.0
+
+# Ultra-Fast Async Web Server & Networking
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+httpx>=0.27.0
+pydantic>=2.8.0
+python-dotenv>=1.0.1
+python-multipart>=0.0.9
+
+# Document & Multimodal Processing
+pillow>=10.4.0
+reportlab>=4.2.0
+
+# Testing & Benchmarking
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
