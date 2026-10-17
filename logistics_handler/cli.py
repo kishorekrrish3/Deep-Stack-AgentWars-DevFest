@@ -116,6 +116,35 @@ async def run_chaos(args):
     print(f"  Audit Log: {out_schema.feedback_audit.error_log}\n")
     print("All Self-Healing Interceptor conditions verified successfully!")
 
+async def run_chat(args):
+    from logistics_handler.copilot_agent import copilot_session_manager
+    session_id = args.session or "cli-session-1"
+    print("\n=======================================================")
+    print("  LogisticsCopilot CLI (Powered by Google ADK)")
+    print("  Autonomous Conversational Logistics & Yard Assistant")
+    print("  Type 'exit' or 'quit' to leave.")
+    print("=======================================================\n")
+    if args.message:
+        res = await copilot_session_manager.chat(args.message, session_id=session_id)
+        tools_str = ", ".join(res["tools_used"]) if res["tools_used"] else "direct"
+        print(f"\nCopilot [{res['execution_time_ms']:.1f}ms | Tools: {tools_str}]:\n{res['reply']}\n")
+        return
+
+    while True:
+        try:
+            user_input = input("\nYou > ").strip()
+            if not user_input:
+                continue
+            if user_input.lower() in ("exit", "quit", "q"):
+                print("Exiting LogisticsCopilot. Goodbye!")
+                break
+            res = await copilot_session_manager.chat(user_input, session_id=session_id)
+            tools_str = ", ".join(res["tools_used"]) if res["tools_used"] else "direct"
+            print(f"\nCopilot [{res['execution_time_ms']:.1f}ms | Tools: {tools_str}]:\n{res['reply']}")
+        except (KeyboardInterrupt, EOFError):
+            print("\nExiting LogisticsCopilot. Goodbye!")
+            break
+
 def main():
     parser = argparse.ArgumentParser(description="LogisticsHandler-ADK-UltraFast CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -129,6 +158,11 @@ def main():
     p_dispatch.add_argument("--cargo-tons", type=float, default=12.5, help="Gross tons")
     p_dispatch.add_argument("--dock-type", default="STANDARD", help="Dock requirement")
     p_dispatch.add_argument("--image", default=None, help="Path to waybill image or PDF")
+
+    # Copilot / Chat Command
+    p_chat = subparsers.add_parser("chat", aliases=["copilot"], help="Interactive Conversational Logistics Copilot (Google ADK)")
+    p_chat.add_argument("-m", "--message", default=None, help="Single-shot message to Copilot")
+    p_chat.add_argument("-s", "--session", default="cli-default", help="Session ID")
 
     # Benchmark Command
     p_bench = subparsers.add_parser("benchmark", help="Run latency SLA benchmark")
@@ -146,6 +180,8 @@ def main():
 
     if args.command == "dispatch":
         asyncio.run(run_dispatch(args))
+    elif args.command in ("chat", "copilot"):
+        asyncio.run(run_chat(args))
     elif args.command == "benchmark":
         asyncio.run(run_benchmark(args))
     elif args.command == "mcp":
