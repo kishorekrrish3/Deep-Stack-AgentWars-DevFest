@@ -5,8 +5,15 @@
 [![Latency SLA](https://img.shields.io/badge/Latency%20SLA-%3C%20350ms%20(PASSED)-10b981.svg)](benchmark.py)
 [![Cost](https://img.shields.io/badge/Cost-%240.00%20(Free%20Tier)-emerald.svg)](#zero-cost-architecture)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7.svg)](https://logisticshandler-adk-ultrafast.onrender.com)
 
 > **Autonomous Logistics & Multimodal Yard Dispatcher** powered by **Google ADK (Agent Development Kit)**, designed to shatter latency barriers with **sub-350ms turn-around dispatch**, zero-cost operation ($0.00 Free Tier), local Model Context Protocol (MCP) yard allocation, and a self-healing fault-tolerant interceptor.
+
+### 🌐 Live Deployment
+
+> **Render URL**: [https://logisticshandler-adk-ultrafast.onrender.com](https://logisticshandler-adk-ultrafast.onrender.com)
+>
+> The API is deployed on Render's free tier. The first request after a cold start may take ~30 seconds while the container boots.
 
 ---
 
@@ -24,6 +31,8 @@
 - [Self-Healing Feedback Loop & Chaos Engineering](#-self-healing-feedback-loop--chaos-engineering)
 - [Model Context Protocol (MCP) Yard Architecture](#-model-context-protocol-mcp-yard-architecture)
 - [Benchmarking Results](#-benchmarking-results)
+- [Sample Data & Demos for Evaluation Team](#-sample-data--demos-for-evaluation-team)
+- [Zero-Cost Architecture](#zero-cost-architecture)
 - [Strict JSON Output Schema](#-strict-json-output-schema)
 
 ---
@@ -80,7 +89,7 @@ Modern logistics dispatch centers struggle with fragmented legacy software, sequ
      ┌────────────────────────────────────────────────────────┐
      │         RULE 4: SELF-HEALING FEEDBACK INTERCEPTOR      │
      │  - Schema Mismatch: Strips extraneous keys & padding   │
-     │  - HTTP 429: Reroutes to Groq Llama-3.2-11b Vision     │
+     │  - HTTP 429: Reroutes to Zero-Latency Local Cache      │
      │  - Latency Spike (>1200ms): Injects Local Cache        │
      └──────────────────────────┬─────────────────────────────┘
                                 │
@@ -105,8 +114,8 @@ Modern logistics dispatch centers struggle with fragmented legacy software, sequ
 Clone the repository and install the dependencies into a Python virtual environment:
 
 ```bash
-git clone https://github.com/your-org/LogisticsHandler-ADK-UltraFast.git
-cd LogisticsHandler-ADK-UltraFast
+git clone https://github.com/kishorekrrish3/Deep-Stack-AgentWars-DevFest.git
+cd Deep-Stack-AgentWars-DevFest
 
 # Create and activate virtual environment
 python -m venv .venv
@@ -292,6 +301,297 @@ The local Model Context Protocol server manages yard constraints and physical do
 | **BAY-HZ07** | `HAZMAT` | Dock-14-Hazmat-Bay-7 | Spark-proof grounding mandatory; vapor suppression ready; 150m perimeter clear. |
 | **BAY-CS02** | `COLD_CHAIN` | Dock-02-ColdStorage-SubZero | -20°C air curtain seal; dual 480V hookup; 20 min rapid unload window. |
 | **BAY-HL19** | `HEAVY_LIFT` | Dock-19-HeavyCrane-South | 50-ton gantry crane active; reinforced concrete pad; safety escort required. |
+
+---
+
+## 🧪 Sample Data & Demos for Evaluation Team
+
+Use these ready-to-copy commands to verify every capability. Replace `BASE` with your deployment URL or `http://127.0.0.1:8000` for local testing.
+
+```bash
+# Set your base URL (pick one)
+BASE=https://logisticshandler-adk-ultrafast.onrender.com   # Live Render
+# BASE=http://127.0.0.1:8000                               # Local
+```
+
+### Demo 1 — Standard Freight Dispatch (Happy Path)
+
+```bash
+curl -s -X POST "$BASE/dispatch" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bill_id": "WB-99482-TX",
+    "sku": "SKU-AUTO-1001",
+    "origin": "Chicago, IL",
+    "destination": "Dallas, TX",
+    "cargo_tons": 12.5,
+    "dock_type": "STANDARD"
+  }' | python -m json.tool
+```
+
+**Expected Response:**
+```json
+{
+  "status": "SUCCESS",
+  "multimodal_summary": {
+    "bill_id": "WB-99482-TX",
+    "damage_detected": false,
+    "hazmat_classification": "NONE"
+  },
+  "mcp_yard_context": {
+    "assigned_dock": "Dock-04-NorthTerminal",
+    "dock_restrictions": "Standard Bay: Max axle weight 35 tons; clearance height 14.5ft; hydraulic levelers active."
+  },
+  "routing_decision": {
+    "corridor": "I-55S_I-30W_EXPRESS",
+    "eta_hours": 14.32,
+    "toll_cost": 59.12
+  },
+  "feedback_audit": {
+    "self_healed": false,
+    "retry_count": 0,
+    "error_log": "All parallel tools and multimodal dispatch passed within SLA."
+  },
+  "execution_time_ms": 0.55
+}
+```
+
+---
+
+### Demo 2 — Hazmat Cargo with MCP Dock Escalation
+
+```bash
+curl -s -X POST "$BASE/dispatch" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bill_id": "HAZ-77410-CA",
+    "sku": "SKU-CHEM-3300",
+    "origin": "Houston, TX",
+    "destination": "Los Angeles, CA",
+    "cargo_tons": 8.0,
+    "dock_type": "HAZMAT"
+  }' | python -m json.tool
+```
+
+**Expected Response (note HAZMAT dock assignment):**
+```json
+{
+  "status": "SUCCESS",
+  "multimodal_summary": {
+    "bill_id": "HAZ-77410-CA",
+    "damage_detected": false,
+    "hazmat_classification": "CLASS_3_FLAMMABLE"
+  },
+  "mcp_yard_context": {
+    "assigned_dock": "Dock-14-Hazmat-Bay-7",
+    "dock_restrictions": "Hazmat Bay: Spark-proof grounding mandatory; vapor suppression system ready; 150m safety perimeter enforced."
+  },
+  "routing_decision": {
+    "corridor": "I-10W_HAZMAT_CORRIDOR",
+    "eta_hours": 22.15,
+    "toll_cost": 142.80
+  },
+  "feedback_audit": {
+    "self_healed": false,
+    "retry_count": 0,
+    "error_log": "All parallel tools and multimodal dispatch passed within SLA."
+  },
+  "execution_time_ms": 0.42
+}
+```
+
+---
+
+### Demo 3 — Cold Chain / Refrigerated Cargo
+
+```bash
+curl -s -X POST "$BASE/dispatch" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bill_id": "COLD-55100-FL",
+    "sku": "SKU-PHARMA-7700",
+    "origin": "Miami, FL",
+    "destination": "Atlanta, GA",
+    "cargo_tons": 5.2,
+    "dock_type": "COLD_CHAIN"
+  }' | python -m json.tool
+```
+
+**Expected Response (note cold-storage dock):**
+```json
+{
+  "status": "SUCCESS",
+  "multimodal_summary": {
+    "bill_id": "COLD-55100-FL",
+    "damage_detected": false,
+    "hazmat_classification": "NONE"
+  },
+  "mcp_yard_context": {
+    "assigned_dock": "Dock-02-ColdStorage-SubZero",
+    "dock_restrictions": "Cold Chain Bay: -20°C air curtain seal active; dual 480V power hookup; 20-minute rapid unload window."
+  },
+  "routing_decision": {
+    "corridor": "I-95N_I-75N_REEFER",
+    "eta_hours": 10.50,
+    "toll_cost": 38.25
+  },
+  "feedback_audit": {
+    "self_healed": false,
+    "retry_count": 0,
+    "error_log": "All parallel tools and multimodal dispatch passed within SLA."
+  },
+  "execution_time_ms": 0.38
+}
+```
+
+---
+
+### Demo 4 — Heavy-Lift Crane Assignment
+
+```bash
+curl -s -X POST "$BASE/dispatch" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bill_id": "HL-30020-NY",
+    "sku": "SKU-STEEL-9900",
+    "origin": "Pittsburgh, PA",
+    "destination": "Newark, NJ",
+    "cargo_tons": 45.0,
+    "dock_type": "HEAVY_LIFT"
+  }' | python -m json.tool
+```
+
+**Expected Response (50-ton gantry crane activated):**
+```json
+{
+  "status": "SUCCESS",
+  "multimodal_summary": {
+    "bill_id": "HL-30020-NY",
+    "damage_detected": false,
+    "hazmat_classification": "NONE"
+  },
+  "mcp_yard_context": {
+    "assigned_dock": "Dock-19-HeavyCrane-South",
+    "dock_restrictions": "Heavy Lift Bay: 50-ton gantry crane active; reinforced concrete pad; safety escort required."
+  },
+  "routing_decision": {
+    "corridor": "I-76E_NJ_TURNPIKE",
+    "eta_hours": 6.20,
+    "toll_cost": 28.50
+  },
+  "feedback_audit": {
+    "self_healed": false,
+    "retry_count": 0,
+    "error_log": "All parallel tools and multimodal dispatch passed within SLA."
+  },
+  "execution_time_ms": 0.31
+}
+```
+
+---
+
+### Demo 5 — Multimodal Waybill Image Upload
+
+Upload one of the included sample waybill images for single-pass visual ingestion:
+
+```bash
+# Clean freight waybill
+curl -s -X POST "$BASE/dispatch/multimodal" \
+  -F "file=@data/sample_waybill_clean.png" \
+  -F "sku=SKU-AUTO-1001" \
+  -F "origin=Chicago, IL" \
+  -F "destination=Dallas, TX" \
+  -F "cargo_tons=12.5" \
+  -F "dock_type=STANDARD" | python -m json.tool
+
+# Damaged hazmat waybill
+curl -s -X POST "$BASE/dispatch/multimodal" \
+  -F "file=@data/sample_waybill_damaged_hazmat.png" \
+  -F "sku=SKU-CHEM-3300" \
+  -F "origin=Houston, TX" \
+  -F "destination=Los Angeles, CA" \
+  -F "cargo_tons=8.0" \
+  -F "dock_type=HAZMAT" | python -m json.tool
+```
+
+---
+
+### Demo 6 — Parallel Tool Execution Verification (Rule 3)
+
+Verifies all 3 tools (`calculate_low_latency_route`, `check_erp_stock_live`, `mcp_yard_controller`) fire concurrently:
+
+```bash
+curl -s -X POST "$BASE/tools/execute?origin=Chicago%2C+IL&destination=Dallas%2C+TX&cargo_tons=12.5&sku=SKU-AUTO-1001&dock_type=STANDARD" | python -m json.tool
+```
+
+**Expected Response:**
+```json
+{
+  "parallel_execution_time_ms": 0.18,
+  "concurrency_verified": true,
+  "route_result": { "corridor": "I-55S_I-30W_EXPRESS", "eta_hours": 14.32, "toll_cost": 59.12 },
+  "stock_result": { "sku": "SKU-AUTO-1001", "in_stock": true, "staging_status": "STAGED_READY" },
+  "yard_result": { "dock_type": "STANDARD", "assigned_dock": "Dock-04-NorthTerminal", "restrictions": "..." }
+}
+```
+
+---
+
+### Demo 7 — MCP Yard Controller Direct Query (Rule 5)
+
+```bash
+# Standard dock
+curl -s "$BASE/mcp/yard?dock_type=STANDARD" | python -m json.tool
+
+# Hazmat dock
+curl -s "$BASE/mcp/yard?dock_type=HAZMAT" | python -m json.tool
+
+# Cold-chain dock
+curl -s "$BASE/mcp/yard?dock_type=COLD_CHAIN" | python -m json.tool
+
+# Heavy-lift dock
+curl -s "$BASE/mcp/yard?dock_type=HEAVY_LIFT" | python -m json.tool
+```
+
+---
+
+### Demo 8 — Health Check & Metrics
+
+```bash
+# Health endpoint
+curl -s "$BASE/health" | python -m json.tool
+
+# Metrics endpoint (after running a few dispatches)
+curl -s "$BASE/metrics" | python -m json.tool
+```
+
+---
+
+### Sample Input Reference Table
+
+| Scenario | `bill_id` | `sku` | `origin` | `destination` | `cargo_tons` | `dock_type` |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Standard Freight | `WB-99482-TX` | `SKU-AUTO-1001` | Chicago, IL | Dallas, TX | 12.5 | `STANDARD` |
+| Hazmat Flammable | `HAZ-77410-CA` | `SKU-CHEM-3300` | Houston, TX | Los Angeles, CA | 8.0 | `HAZMAT` |
+| Cold-Chain Pharma | `COLD-55100-FL` | `SKU-PHARMA-7700` | Miami, FL | Atlanta, GA | 5.2 | `COLD_CHAIN` |
+| Heavy Steel Coil | `HL-30020-NY` | `SKU-STEEL-9900` | Pittsburgh, PA | Newark, NJ | 45.0 | `HEAVY_LIFT` |
+| Damaged Seal Alert | `DMG-44200-OH` | `SKU-ELEC-5500` | Columbus, OH | Detroit, MI | 3.8 | `STANDARD` |
+
+---
+
+## Zero-Cost Architecture
+
+This project operates at **\$0.00 total cost** by design:
+
+| Component | Provider | Cost |
+| :--- | :--- | :--- |
+| **AI Model** | Google AI Studio (Gemini Flash) | Free Tier — 15 RPM / 1M TPD |
+| **Hosting** | Render.com Free Plan | \$0.00 (750 hrs/month) |
+| **MCP Yard Server** | Local in-process (no external call) | \$0.00 |
+| **Routing / ERP / Inventory** | Deterministic local tools | \$0.00 |
+| **CI/CD** | GitHub Actions (public repo) | Free |
+
+> No paid APIs, no external databases, no cloud functions — every component runs within free-tier limits.
 
 ---
 
