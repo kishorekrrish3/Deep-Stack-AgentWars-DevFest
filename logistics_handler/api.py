@@ -6,7 +6,7 @@ Exposes REST and Multimodal Upload Endpoints with Sub-350ms Turnaround Monitorin
 import time
 import base64
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -17,10 +17,14 @@ from logistics_handler.models import (
     LogisticsDispatchOutput,
     RouteCalculationInput,
     ErpStockInput,
-    McpYardInput
+    McpYardInput,
+    CopilotChatRequest,
+    CopilotChatResponse,
+    McpToolCallRequest
 )
 from logistics_handler.orchestrator import orchestrator
 from logistics_handler.mcp_server import mcp_yard_server
+from logistics_handler.copilot_agent import copilot_session_manager
 from logistics_handler.tools.routing import calculate_low_latency_route
 from logistics_handler.tools.inventory import check_erp_stock_live
 from logistics_handler.tools.yard import mcp_yard_controller
@@ -154,6 +158,55 @@ async def execute_tools_concurrently(
 async def get_mcp_yard_info(dock_type: str = "STANDARD"):
     """Direct query to the Local Model Context Protocol (MCP) Yard Server."""
     return mcp_yard_server.resolve_dock(dock_type)
+
+@app.get("/mcp/tools")
+async def mcp_list_tools():
+    """Lists registered tools adhering to the Model Context Protocol (MCP) standard."""
+    return mcp_yard_server.list_tools()
+
+@app.post("/mcp/call")
+async def mcp_call_tool(request: McpToolCallRequest):
+    """Executes a tool call compliant with the Model Context Protocol (MCP) JSON-RPC 2.0 specification."""
+    tool_name = "mcp_yard_controller"
+    arguments = {}
+    if request.params:
+        tool_name = request.params.get("name", tool_name)
+        arguments = request.params.get("arguments", {})
+    return mcp_yard_server.call_tool(tool_name, arguments)
+
+@app.post("/copilot/chat", response_model=CopilotChatResponse)
+async def copilot_chat_endpoint(request: CopilotChatRequest):
+    """Conversational Copilot endpoint powered by Google ADK with multimodal capability & tools."""
+    result = await copilot_session_manager.chat(
+        message=request.message,
+        session_id=request.session_id,
+        image_base64=request.image_base64,
+        image_mime_type=request.image_mime_type
+    )
+    return result
+
+@app.post("/copilot/multimodal", response_model=CopilotChatResponse)
+async def copilot_multimodal_endpoint(
+    file: UploadFile = File(...),
+    message: str = Form("Please inspect this document and provide logistics recommendations."),
+    session_id: Optional[str] = Form(None)
+):
+    """Conversational Copilot multimodal upload endpoint (JPEG, PNG, PDF)."""
+    file_bytes = await file.read()
+    b64_str = base64.b64encode(file_bytes).decode("utf-8")
+    mime_type = file.content_type or "image/jpeg"
+    result = await copilot_session_manager.chat(
+        message=message,
+        session_id=session_id,
+        image_base64=b64_str,
+        image_mime_type=mime_type
+    )
+    return result
+
+@app.get("/copilot/history")
+async def copilot_history_endpoint(session_id: str):
+    """Retrieves conversation history for a specific session."""
+    return {"session_id": session_id, "messages": copilot_session_manager.get_history(session_id)}
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard_view():

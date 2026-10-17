@@ -77,3 +77,24 @@ class DispatchRequest(BaseModel):
     simulate_429: Optional[bool] = False
     simulate_latency_spike: Optional[bool] = False
     simulate_schema_corruption: Optional[bool] = False
+
+# Conversational Copilot Schemas
+class CopilotChatRequest(BaseModel):
+    message: str = Field(..., description="User's natural language message or query")
+    session_id: Optional[str] = Field(default=None, description="Optional conversation session ID")
+    image_base64: Optional[str] = Field(default=None, description="Optional base64-encoded image or document")
+    image_mime_type: Optional[str] = Field(default="image/jpeg", description="MIME type of the attachment")
+
+class CopilotChatResponse(BaseModel):
+    reply: str = Field(..., description="Assistant's conversational markdown reply")
+    session_id: str = Field(..., description="Conversation session ID")
+    tools_used: List[str] = Field(default_factory=list, description="List of ADK/MCP tools invoked during this turn")
+    execution_time_ms: float = Field(default=0.0, description="Response turnaround time in milliseconds")
+    multimodal_processed: bool = Field(default=False, description="Whether an image or document was visually processed")
+
+# Model Context Protocol JSON-RPC Schemas
+class McpToolCallRequest(BaseModel):
+    jsonrpc: Optional[str] = Field(default="2.0", description="JSON-RPC version")
+    id: Optional[Any] = Field(default="1", description="RPC request ID")
+    method: Optional[str] = Field(default="tools/call", description="RPC method name")
+    params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="RPC parameters")

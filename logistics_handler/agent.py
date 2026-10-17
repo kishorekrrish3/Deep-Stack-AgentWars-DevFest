@@ -61,5 +61,8 @@ def create_adk_agent(model_name: str = PRIMARY_MODEL) -> Agent:
         ]
     )
 
-# Root agent export for standard ADK discovery
+# Root agent export for standard ADK discovery (Autonomous UltraFast Dispatcher)
 root_agent = create_adk_agent()
+
+# Export Conversational Agent for ADK discovery
+from logistics_handler.copilot_agent import create_copilot_agent, copilot_root_agent
