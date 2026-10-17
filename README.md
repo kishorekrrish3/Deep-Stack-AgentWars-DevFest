@@ -63,40 +63,9 @@ Modern logistics dispatch centers struggle with fragmented legacy software, sequ
 
 ## 🏗 Architecture & Operational Rules
 
-```
-                      [ Incoming Waybill / BOL Manifest ]
-                       (JPEG, PNG, PDF, or Direct JSON)
-                                      │
-                                      ▼
-             ┌──────────────────────────────────────────────────┐
-             │       UltraFast Asynchronous Orchestrator        │
-             │           (LogisticsHandlerAgent)                │
-             └──────┬───────────────────────────────────┬───────┘
-                    │                                   │
-       ┌────────────┴────────────┐         ┌────────────┴────────────┐
-       │   RULE 3: PARALLEL      │         │   RULE 2: MULTIMODAL    │
-       │    TOOL DISPATCH        │         │     SINGLE PASS         │
-       │    (asyncio.gather)     │         │ (Gemini Flash / Fallback)│
-       └────┬───────┬───────┬────┘         └────────────┬────────────┘
-            │       │       │                           │
-            ▼       ▼       ▼                           ▼
-        Routing    ERP     MCP Yard Controller      SKU, Damage,
-        Matrix    Stock   (Bays, Clearances, Hazmat) Hazmat Extracted
-            │       │       │                           │
-            └───────┼───────┴───────────────────────────┘
-                    │
-                    ▼
-     ┌────────────────────────────────────────────────────────┐
-     │         RULE 4: SELF-HEALING FEEDBACK INTERCEPTOR      │
-     │  - Schema Mismatch: Strips extraneous keys & padding   │
-     │  - HTTP 429: Reroutes to Zero-Latency Local Cache      │
-     │  - Latency Spike (>1200ms): Injects Local Cache        │
-     └──────────────────────────┬─────────────────────────────┘
-                                │
-                                ▼
-         [ STRICT OUTPUT SCHEMA: Pure JSON Actions Directly ]
-         (Status, Multimodal, MCP Dock, Route, Audit, Latency)
-```
+<p align="center">
+  <img src="diagram.png" alt="LogisticsHandler-ADK-UltraFast Architecture & Operational Flow" width="100%">
+</p>
 
 ### The 5 Operational Rules
 - **RULE 1 (SPEED FIRST)**: Zero conversational padding, markdown preambles, or apologies. Emits pure JSON actions directly.
