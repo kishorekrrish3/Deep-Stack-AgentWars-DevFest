@@ -109,7 +109,7 @@ cp .env.example .env
 Edit `.env` with your free-tier Google AI Studio API key:
 
 ```ini
-GOOGLE_API_KEY=your_gemini_api_key_here
+GOOGLE_API_KEY=AQ.Ab8RN6L4F5UAQriwpr0ijmE7n9ovbZaHGEI-kAuc8jjIrbJnqA
 GOOGLE_GENAI_USE_ENTERPRISE=0
 PRIMARY_MODEL=gemini-2.0-flash
 FALLBACK_PRIMARY_MODEL=gemini-3.8-flash
