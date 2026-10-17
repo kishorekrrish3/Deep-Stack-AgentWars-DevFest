@@ -10,6 +10,13 @@ import argparse
 import base64
 from pathlib import Path
 
+# Ensure UTF-8 output support across platforms (including Windows consoles)
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from logistics_handler.models import DispatchRequest
 from logistics_handler.orchestrator import orchestrator
 from logistics_handler.mcp_server import mcp_yard_server
