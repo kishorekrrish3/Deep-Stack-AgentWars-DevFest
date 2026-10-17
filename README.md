@@ -5,7 +5,7 @@
 [![Latency SLA](https://img.shields.io/badge/Latency%20SLA-%3C%20350ms%20(PASSED)-10b981.svg)](benchmark.py)
 [![Cost](https://img.shields.io/badge/Cost-%240.00%20(Free%20Tier)-emerald.svg)](#zero-cost-architecture)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7.svg)](https://logisticshandler-adk-ultrafast.onrender.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7.svg)](https://deep-stack-agentwars-devfest.onrender.com/)
 
 > **Autonomous Logistics & Multimodal Yard Dispatcher** powered by **Google ADK (Agent Development Kit)**, designed to shatter latency barriers with **sub-350ms turn-around dispatch**, zero-cost operation ($0.00 Free Tier), local Model Context Protocol (MCP) yard allocation, and a self-healing fault-tolerant interceptor.
 
@@ -279,8 +279,8 @@ Use these ready-to-copy commands to verify every capability. Replace `BASE` with
 
 ```bash
 # Set your base URL (pick one)
-BASE=https://logisticshandler-adk-ultrafast.onrender.com   # Live Render
-# BASE=http://127.0.0.1:8000                               # Local
+BASE=https://deep-stack-agentwars-devfest.onrender.com   # Live Render
+# BASE=http://127.0.0.1:8000                              # Local
 ```
 
 ### Demo 1 — Standard Freight Dispatch (Happy Path)
