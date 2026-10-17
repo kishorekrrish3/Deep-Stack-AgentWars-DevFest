@@ -11,7 +11,7 @@
 
 ### 🌐 Live Deployment
 
-> **Render URL**: [https://logisticshandler-adk-ultrafast.onrender.com](https://logisticshandler-adk-ultrafast.onrender.com)
+> **Render URL**: [https://deep-stack-agentwars-devfest.onrender.com/](https://deep-stack-agentwars-devfest.onrender.com/)
 >
 > The API is deployed on Render's free tier. The first request after a cold start may take ~30 seconds while the container boots.
 
