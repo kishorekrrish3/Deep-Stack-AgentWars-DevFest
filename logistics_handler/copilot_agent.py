@@ -45,25 +45,14 @@ CONVERSATIONAL TONE:
 - Format responses cleanly with Markdown (bullet points, bold highlights, code blocks where appropriate).
 """
 
-def trigger_autonomous_dispatch(
+async def async_trigger_autonomous_dispatch(
     sku: str = "SKU-AUTO-1001",
     origin: str = "Chicago, IL",
     destination: str = "Dallas, TX",
     cargo_tons: float = 12.5,
     dock_type: str = "STANDARD"
 ) -> Dict[str, Any]:
-    """Triggers the ultra-fast sub-350ms autonomous dispatch pipeline.
-
-    Args:
-        sku: SKU identifier (e.g., 'SKU-AUTO-1001', 'SKU-CHEM-9012')
-        origin: Origin city or terminal (e.g., 'Chicago, IL')
-        destination: Destination city or terminal (e.g., 'Dallas, TX')
-        cargo_tons: Total gross cargo weight in tons
-        dock_type: Dock classification (STANDARD, HAZMAT, COLD_CHAIN, HEAVY_LIFT)
-
-    Returns:
-        Dict with dispatch summary, assigned dock, corridor, and latency.
-    """
+    """Asynchronously triggers the ultra-fast sub-350ms autonomous dispatch pipeline."""
     req = DispatchRequest(
         bill_id=f"DISPATCH-{int(time.time())}",
         sku=sku,
@@ -72,17 +61,7 @@ def trigger_autonomous_dispatch(
         cargo_tons=cargo_tons,
         dock_type=dock_type
     )
-    # Run sync-compatible dispatch
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            output = asyncio.run_coroutine_threadsafe(orchestrator.dispatch(req), loop).result()
-        else:
-            output = loop.run_until_complete(orchestrator.dispatch(req))
-    except Exception:
-        # Fallback in-process resolution
-        output = asyncio.run(orchestrator.dispatch(req))
-
+    output = await orchestrator.dispatch(req)
     return {
         "status": output.status,
         "assigned_dock": output.mcp_yard_context.assigned_dock,
@@ -92,6 +71,22 @@ def trigger_autonomous_dispatch(
         "toll_cost": output.routing_decision.toll_cost,
         "execution_time_ms": output.execution_time_ms
     }
+
+def trigger_autonomous_dispatch(
+    sku: str = "SKU-AUTO-1001",
+    origin: str = "Chicago, IL",
+    destination: str = "Dallas, TX",
+    cargo_tons: float = 12.5,
+    dock_type: str = "STANDARD"
+) -> Dict[str, Any]:
+    """Synchronous wrapper for trigger_autonomous_dispatch."""
+    import concurrent.futures
+    with concurrent.futures.ThreadPoolExecutor() as pool:
+        return pool.submit(
+            lambda: asyncio.run(
+                async_trigger_autonomous_dispatch(sku, origin, destination, cargo_tons, dock_type)
+            )
+        ).result()
 
 def create_copilot_agent(model_name: str = PRIMARY_MODEL) -> Agent:
     """Factory function to build the Google ADK Conversational Copilot Agent."""
@@ -182,7 +177,7 @@ class ConversationalCopilotSessionManager:
 
         # If Gemini was not used or failed (401, offline, etc.), execute local conversational intelligence
         if not reply:
-            reply, tools_used = self._run_local_conversational(
+            reply, tools_used = await self._run_local_conversational(
                 message=message,
                 history=history[:-1],
                 multimodal_info=multimodal_info
@@ -233,13 +228,20 @@ class ConversationalCopilotSessionManager:
             parts.append(types.Part.from_bytes(data=img_bytes, mime_type=image_mime_type or "image/jpeg"))
         parts.append(types.Part.from_text(text=current_prompt))
 
-        response = self.client.models.generate_content(
-            model=self.model_name,
-            contents=parts
-        )
-        return response.text or "I processed your request.", tools_used
+        try:
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    self.client.models.generate_content,
+                    model=self.model_name,
+                    contents=parts
+                ),
+                timeout=1.0
+            )
+            return response.text or "I processed your request.", tools_used
+        except Exception:
+            return None, []
 
-    def _run_local_conversational(
+    async def _run_local_conversational(
         self,
         message: str,
         history: List[Dict[str, Any]],
@@ -286,7 +288,7 @@ class ConversationalCopilotSessionManager:
             destination = "Dallas, TX"
             tons = 14.0
 
-            res = trigger_autonomous_dispatch(sku=sku, origin=origin, destination=destination, cargo_tons=tons, dock_type=dock)
+            res = await async_trigger_autonomous_dispatch(sku=sku, origin=origin, destination=destination, cargo_tons=tons, dock_type=dock)
             tools_used.extend(["mcp_yard_controller", "calculate_low_latency_route", "check_erp_stock_live", "trigger_autonomous_dispatch"])
 
             return (
