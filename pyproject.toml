@@ -24,6 +24,9 @@ dependencies = [
     "reportlab>=4.2.0"
 ]
 
+[tool.setuptools.packages.find]
+include = ["logistics_handler*"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.0",
