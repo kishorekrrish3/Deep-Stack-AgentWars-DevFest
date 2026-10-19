@@ -1,5 +1,5 @@
 """
-Command-Line Interface (CLI) for LogisticsHandler-ADK-UltraFast.
+Command-Line Interface (CLI) for DispatchGraph.
 Provides fast dispatching, batch latency benchmarking, and chaos testing.
 """
 
@@ -127,7 +127,7 @@ async def run_chat(args):
     from logistics_handler.copilot_agent import copilot_session_manager
     session_id = args.session or "cli-session-1"
     print("\n=======================================================")
-    print("  LogisticsCopilot CLI (Powered by Google ADK)")
+    print("  DispatchGraph Copilot CLI (Powered by Google ADK)")
     print("  Autonomous Conversational Logistics & Yard Assistant")
     print("  Type 'exit' or 'quit' to leave.")
     print("=======================================================\n")
@@ -153,7 +153,7 @@ async def run_chat(args):
             break
 
 def main():
-    parser = argparse.ArgumentParser(description="LogisticsHandler-ADK-UltraFast CLI")
+    parser = argparse.ArgumentParser(description="DispatchGraph CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Dispatch Command
