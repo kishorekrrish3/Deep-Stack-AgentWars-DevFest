@@ -73,8 +73,8 @@ The text-only dispatch fast path and local tool demonstrations can run without c
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/kishorekrrish3/Deep-Stack-AgentWars-DevFest.git
-cd Deep-Stack-AgentWars-DevFest
+git clone https://github.com/kishorekrrish3/Vectron.git
+cd Vectron
 
 python -m venv .venv
 ```
