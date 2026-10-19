@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dispatchgraph-logistics"
+name = "vectron-logistics-agent"
 version = "2.0.0"
-description = "A grounded AI logistics dispatch prototype built with Google ADK, FastAPI, and deterministic tools."
+description = "VECTRON: a grounded AI logistics dispatch prototype built with Google ADK, FastAPI, and deterministic tools."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
-    { name = "Logistics AI Engineering Team" }
+    { name = "Kishore P." }
 ]
 dependencies = [
     "google-adk>=2.12.0",
@@ -34,5 +34,8 @@ dev = [
 ]
 
 [project.scripts]
+vectron = "logistics_handler.cli:main"
+vectron-dispatcher = "logistics_handler.cli:main"
+# Backward-compatible command aliases for the original competition prototype
 dispatchgraph = "logistics_handler.cli:main"
 logistics-dispatcher = "logistics_handler.cli:main"
