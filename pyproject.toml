@@ -36,3 +36,6 @@ dev = [
 [project.scripts]
 vectron = "logistics_handler.cli:main"
 vectron-dispatcher = "logistics_handler.cli:main"
+# Backward-compatible command aliases for the original competition prototype
+dispatchgraph = "logistics_handler.cli:main"
+logistics-dispatcher = "logistics_handler.cli:main"
