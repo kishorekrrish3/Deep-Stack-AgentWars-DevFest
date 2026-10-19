@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">VECTRON</title>
+  <desc id="desc">Connected logistics workflow nodes around a central dispatch hub.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f2438"/>
+      <stop offset="1" stop-color="#1d4260"/>
+    </linearGradient>
+    <linearGradient id="hub" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="122" height="122" rx="28" fill="url(#bg)"/>
+  <g fill="none" stroke="#93c5fd" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".95">
+    <path d="M30 35 L62 63 L97 30"/>
+    <path d="M62 63 L99 94"/>
+    <path d="M62 63 L29 96"/>
+    <path d="M30 35 L30 96"/>
+  </g>
+  <g fill="#102a43" stroke="#7dd3fc" stroke-width="3">
+    <circle cx="30" cy="35" r="10"/>
+    <circle cx="97" cy="30" r="10"/>
+    <circle cx="29" cy="96" r="10"/>
+    <circle cx="99" cy="94" r="10"/>
+  </g>
+  <circle cx="62" cy="63" r="17" fill="url(#hub)" stroke="#e0f2fe" stroke-width="3"/>
+  <path d="M52 64h17m-5-6 6 6-6 6" fill="none" stroke="#0f2438" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

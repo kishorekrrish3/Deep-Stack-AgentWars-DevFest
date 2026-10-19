@@ -1,5 +1,5 @@
 """
-Tool registry for LogisticsHandler-ADK-UltraFast
+DispatchGraph tool registry
 Exports synchronous and asynchronous tool definitions.
 """
 

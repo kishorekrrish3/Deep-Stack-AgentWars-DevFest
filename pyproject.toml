@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "logistics-handler-adk-ultrafast"
+name = "dispatchgraph-logistics"
 version = "2.0.0"
-description = "Autonomous Logistics & Multimodal Yard Dispatcher built on google-adk with sub-350ms turn-around latency"
+description = "A grounded AI logistics dispatch prototype built with Google ADK, FastAPI, and deterministic tools."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
@@ -34,4 +34,5 @@ dev = [
 ]
 
 [project.scripts]
+dispatchgraph = "logistics_handler.cli:main"
 logistics-dispatcher = "logistics_handler.cli:main"

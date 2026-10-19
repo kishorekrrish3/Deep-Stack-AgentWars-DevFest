@@ -1,5 +1,5 @@
 """
-Entry point to launch the LogisticsHandler-ADK-UltraFast Server.
+Entry point to launch the DispatchGraph API server.
 Starts FastAPI + MCP Yard Controller + Dashboard on http://127.0.0.1:8000
 """
 
@@ -14,9 +14,9 @@ from logistics_handler.config import API_PORT
 
 def main():
     print(f"\n=======================================================")
-    print(f"  LogisticsHandler-ADK-UltraFast Server v2.0.0")
+    print(f"  DispatchGraph Server v2.0.0")
     print(f"  Framework: google-adk (Agent Development Kit)")
-    print(f"  Target Latency SLA: < 350ms | Cost: $0.00")
+    print(f"  Benchmark target: < 350ms | latency and cost vary by runtime path")
     print(f"  Dashboard: http://127.0.0.1:{API_PORT}")
     print(f"  API Docs:  http://127.0.0.1:{API_PORT}/docs")
     print(f"=======================================================\n")
