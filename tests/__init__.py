@@ -1,3 +1,3 @@
 """
-Test suite package for LogisticsHandler-ADK-UltraFast
+DispatchGraph test suite
 """
