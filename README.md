@@ -289,6 +289,12 @@ Report a security concern privately according to [SECURITY.md](SECURITY.md).
 - [ ] Replace local route/inventory examples with documented provider interfaces and optional real integrations.
 - [ ] Add authentication, structured logging with redaction, and production deployment hardening.
 
+## Project collaborators
+
+- **Kishore P.** — project development and integration
+- **Kripasundari Uvarajan** — collaborator
+- **Priyadharshini** — collaborator
+
 ## Contributing
 
 Issues, focused bug reports, documentation improvements, and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), include reproduction steps for bugs, and run the relevant tests before opening a pull request.
