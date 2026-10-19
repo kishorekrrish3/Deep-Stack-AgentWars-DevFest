@@ -1,5 +1,5 @@
 """
-Automated Latency & SLA Verification Benchmark for LogisticsHandler-ADK-UltraFast.
+DispatchGraph latency and recovery benchmark.
 Executes test cases against all operational rules:
 - Rule 1: Pure JSON Actions directly without padding
 - Rule 2: Multimodal single-pass extraction
@@ -23,8 +23,8 @@ from logistics_handler.mcp_server import mcp_yard_server
 
 async def run_comprehensive_benchmark():
     print("\n" + "=" * 65)
-    print(" LOGISTICSHANDLER-ADK-ULTRAFAST BENCHMARK & SLA AUDIT")
-    print(" Target Latency: < 350ms | Cost: $0.00 (Strictly Free Tier)")
+    print(" DISPATCHGRAPH BENCHMARK & RECOVERY CHECK")
+    print(" Benchmark target: < 350ms | cost depends on provider and model usage")
     print("=" * 65)
 
     # 1. Parallel Tools Concurrency Benchmark (Rule 3)
@@ -128,7 +128,7 @@ async def run_comprehensive_benchmark():
     print(f"  Average Latency:              {avg_ms:.2f} ms")
     print(f"  95th Percentile (P95):        {p95_ms:.2f} ms")
     print(f"  Maximum Latency:              {max_ms:.2f} ms")
-    print(f"  Cost Incurred:                $0.00 (Zero-Cost Free Tier AI Studio)")
+    print(f"  Cost:                         Not measured; depends on provider usage")
     print(f"  SLA Verdict:                  PASSED (< 350ms SLA Target Achieved!)")
     print("=" * 65 + "\n")
 
