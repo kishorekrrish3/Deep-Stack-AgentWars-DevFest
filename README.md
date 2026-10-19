@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="assets/dispatchgraph-mark.svg" alt="DispatchGraph mark" width="88" height="88">
-  <h1>DispatchGraph</h1>
-  <p><strong>Grounded AI for logistics dispatch.</strong></p>
-  <p>Multimodal shipment intake, coordinated dispatch tools, yard-rule checks, and recoverable structured outputs.</p>
+  <img src="assets/vectron-mark.svg" alt="VECTRON mark" width="88" height="88">
+  <h1>VECTRON</h1>
+  <p><strong>Autonomous dispatch. Grounded decisions.</strong></p>
+  <p>LOGISTICS INTELLIGENCE — multimodal shipment understanding, coordinated dispatch tools, and grounded operational decisions.</p>
   <p>
     <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python 3.11+">
     <img src="https://img.shields.io/badge/Agent%20Framework-Google%20ADK-4285F4" alt="Google ADK">
@@ -13,7 +13,7 @@
 
 ---
 
-DispatchGraph is an open-source prototype for exploring how AI agents and deterministic tools can work together in logistics operations. It accepts dispatch requests and shipment documents, coordinates route, inventory, and yard checks, and returns a typed dispatch payload with an execution status and recovery audit.
+VECTRON is an open-source prototype for exploring how AI agents and deterministic tools can work together in logistics operations. It accepts dispatch requests and shipment documents, coordinates route, inventory, and yard checks, and returns a typed dispatch payload with an execution status and recovery audit.
 
 The project began as a DevFest 2026 competition prototype and is now being organized as a standalone engineering project: documented, testable, and open to improvements.
 
@@ -299,4 +299,4 @@ Distributed under the [MIT License](LICENSE).
 
 ---
 
-<sub>DispatchGraph was originally developed as a DevFest 2026 prototype and is being evolved into an independently documented open-source project.</sub>
+<sub>VECTRON was originally developed as a DevFest 2026 prototype and is being evolved into an independently documented open-source project.</sub>
