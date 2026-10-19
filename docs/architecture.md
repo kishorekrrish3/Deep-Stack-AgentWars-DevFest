@@ -1,6 +1,6 @@
 # Architecture notes
 
-DispatchGraph is a logistics dispatch prototype built around a FastAPI service, a dispatch orchestrator, deterministic demonstration tools, and a Google ADK conversational copilot.
+VECTRON is a logistics dispatch prototype built around a FastAPI service, a dispatch orchestrator, deterministic demonstration tools, and a Google ADK conversational copilot.
 
 ## Request paths
 
