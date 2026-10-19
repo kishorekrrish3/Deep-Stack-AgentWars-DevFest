@@ -1,6 +1,6 @@
 # Local and hosted deployment notes
 
-DispatchGraph is a prototype. These instructions explain how to run it for learning, local demos, and controlled evaluation. Do not deploy it as an operational logistics service without the security and integration work described in [SECURITY.md](SECURITY.md).
+VECTRON is a prototype. These instructions explain how to run it for learning, local demos, and controlled evaluation. Do not deploy it as an operational logistics service without the security and integration work described in [SECURITY.md](SECURITY.md).
 
 ## Requirements
 
