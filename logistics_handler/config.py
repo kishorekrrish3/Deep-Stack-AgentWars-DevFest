@@ -1,7 +1,7 @@
 """
-Configuration parameters for LogisticsHandler-ADK-UltraFast
-Strict adherence to Zero-Cost ($0.00) and Sub-350ms Latency Target
-Pure Google AI Studio Native Integration (No Groq dependency)
+Runtime configuration for DispatchGraph.
+Performance values are benchmark targets, not service-level guarantees.
+The current core dispatch path uses Google GenAI with a local heuristic fallback.
 """
 
 import os
