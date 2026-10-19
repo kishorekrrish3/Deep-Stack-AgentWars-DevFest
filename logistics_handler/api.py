@@ -1,6 +1,6 @@
 """
-FastAPI High-Speed Async Server for LogisticsHandler-ADK-UltraFast.
-Exposes REST and Multimodal Upload Endpoints with Sub-350ms Turnaround Monitoring.
+FastAPI service for DispatchGraph.
+Exposes dispatch, multimodal intake, conversational copilot, yard-tool, and metrics endpoints.
 """
 
 import time
@@ -30,9 +30,9 @@ from logistics_handler.tools.inventory import check_erp_stock_live
 from logistics_handler.tools.yard import mcp_yard_controller
 
 app = FastAPI(
-    title="LogisticsHandler-ADK-UltraFast API",
+    title="DispatchGraph API",
     version="2.0.0",
-    description="Autonomous Logistics & Multimodal Yard Dispatcher with Sub-350ms Turnaround"
+    description="Grounded logistics dispatch prototype with multimodal intake, local tools, and recovery telemetry."
 )
 
 app.add_middleware(
@@ -68,11 +68,11 @@ def record_metric(output: LogisticsDispatchOutput):
 async def health():
     return {
         "status": "healthy",
-        "service": "LogisticsHandler-ADK-UltraFast",
+        "service": "DispatchGraph",
         "version": "2.0.0",
         "primary_model": orchestrator.primary_model,
         "sla_target_ms": 350.0,
-        "cost_constraint": "$0.00 (Zero-Cost)"
+        "cost_constraint": "Cost depends on model/provider use and account quota"
     }
 
 @app.get("/metrics")
@@ -214,4 +214,4 @@ async def dashboard_view():
     template_path = Path(__file__).parent / "templates" / "dashboard.html"
     if template_path.exists():
         return HTMLResponse(content=template_path.read_text(encoding="utf-8"))
-    return HTMLResponse(content="<h1>LogisticsHandler-ADK-UltraFast Dashboard</h1>")
+    return HTMLResponse(content="<h1>DispatchGraph Dashboard</h1>")
